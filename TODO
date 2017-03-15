@@ -1,0 +1,53 @@
+Connector
+ check features
+ autoreversal - feature based
+ allow different hardcoded params based on paymentType (at the moment all params are sent or not)
+ request paymentType mapping / logic for data translation
+ is it possible to reduce 'shopperReturn and internal-to-external' to redirect with handleAction=true or not
+
+Interface
+ Unflatten to PP XML
+ pretty print PIA
+
+workflow - reply to callback with URL for connector to redirect with
+workflow - sendNotification and get URL from CTPE
+
+implement OPP, Klarna and Inicis (in 10 mins), end to end! Iyizco has custom logic.. if parameter is set, ignore redirect page (example implemented on redirect page?)
+
+
+Proposal:
+
+presentation of issue vs solution
+  - object orientated vs data orientated
+  - polymorphism
+-demo of PIA interface with connector documentation made from PIA
+~Add a new connector from the interface
+-Make updates to the connector
+-Auto test connector based on PIA data
+
+Roll out idea: 
+
+Use this as playground builder
+Build all new connectors this way
+Migrate all other connectors
+Hook this 'Generic' connector up to PAYPIPE_CC or OPP connector
+
+
+
+
+
+Later
+session timeout etc
+how does the 3d connector work? does it send a request to the original, or is that CTPE?
+test flattener against parameterErrors
+different request and response mapping formats
+   xml request / response
+   iso8583 binary
+ "special case" function call (for complex logic such as if the amount is 0, enter this field) - but maybe amount is zero would be different transaction type
+  could connectors be .ini file http://php.net/function.parse-ini-file / http://stackoverflow.com/questions/6411656/how-to-create-php-files-using-php 
+ TODOs
+ combine workflow and paymenttypes?
+ hook up tests - have unit tests and integration tests
+ should be easy to update edit to be like add
+ sahfor.com (or amazon) basic build / release infrastructure (github? ftp?)
+ update 'ctpe' for redirect status

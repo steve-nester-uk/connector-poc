@@ -1,0 +1,67 @@
+workflow-1-1 = sync request and sync response
+workflow-1-2 = sync request and sync response (with parsed redirect data), redirect returns to callback
+workflow-2-3 = sync request and add redirect to internal to response
+workflow-3-3 = sync request and always redirect without connector request
+
+Request 
+   
+interface.php - convert to array
+	-> Processing.php->send() - get connector type from Request.Transaction.MerchantAccount.type
+	if connector not found:
+		--return returnError()--
+	if connector found
+		-> Connector.php->send() - myValidate() - myWorkflow() - validate()
+		if not validated
+			--return getResponse()--
+		if validated
+			-> buildWorkflow() - switch workflow
+			if Workflow::Normal
+				-> handleWorkflow1()
+					-> getEndpoint()
+					-> createPayload()
+					-> transmission
+					-> parseResponse()
+				-> handleTwoStepCapture()
+					-> if DB - if isDBTwoStep() - isCPOnline sendOnline or otherwise sendOffline()
+			if Workflow::RequestAndAlwaysRedirectThenExternal
+				-> handleWorkflow2()
+					-> handleWorkflow1()
+					-> setSessionData()
+					-> setRedirectResponse()
+			if Workflow::AlwaysRedirectThenExternal
+				-> handleWorkflow3()
+					-> setSessionData()
+					-> setRedirectResponse()
+					-> parseResponse();
+
+			return getResponse()
+
+workflow-1-2 = shopperReturn
+workflow-2-3 = internal-to-external (redirect after request) -> do actions then send external
+workflow-3-3 = internal-to-external (always redirect)  -> do actions then send external
+workflow-4   = async notification
+
+Callback
+
+callback.php
+	-> Processing.php->callback() - get connector type from Request.Transaction.MerchantAccount.type
+	if connector not found:
+		--return "connector is null"--
+	if connector found
+		-> Connector.php->callback() - validateCallback()
+		if not validated 
+			--return getResponse()--
+		if validated
+			switch callbackType
+			if internal-to-external - handleInternalToExternal()
+				->  if handleAction
+						--return handleInternalAction()--
+							-> return internalToExternalCallback()
+					if not handleAction
+						get callback file and display
+			if shopperReturn
+				return callbackNotification()
+			if notification
+				return asyncNotification()
+			default
+				return "{callbackType} callback is not implemented"
